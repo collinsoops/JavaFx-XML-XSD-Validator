@@ -1,0 +1,30 @@
+.root {
+  -fx-background-color: "white";
+}
+
+#validateXml {
+  -fx-background-color: "#175bbe";
+}
+#Xsdbutton{
+    -fx-background-color: "#175bbe";
+
+}
+#Xmlbutton{
+    -fx-background-color: "#175bbe";
+
+}
+#Xmlbutton{
+    -fx-border-color: "#175bbe";
+}
+#Xmllabel{
+    -fx-border-color: "#175bbe";
+}
+#Xsdlabel{
+    -fx-border-color: "#175bbe";
+}
+#Xsdtext{
+    -fx-border-color: "black";
+}
+#Xmltext{
+    -fx-border-color: "black";
+}
