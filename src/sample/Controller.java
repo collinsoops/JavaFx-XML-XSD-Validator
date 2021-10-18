@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -9,18 +10,37 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.swing.text.AbstractDocument;
 import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import java.io.File;
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
+import static javax.swing.text.AbstractDocument.*;
 
 public class Controller {
 public  String XmlfilePath;
@@ -28,10 +48,23 @@ public  String XsdfilePath;
 public  Stage stage;
 public Scene scene;
 public Parent root;
+
     @FXML
     private AnchorPane XsdXmlpane;
     @FXML
+    private Label Xsdtext;
+    @FXML
+    private Label Xmltext;
+    @FXML
     private Button validateXml;
+    @FXML
+    private Label Resultlabel;
+    @FXML
+    private TextArea Xsdtextarea;
+    @FXML
+    private HTMLEditor editor;
+    @FXML
+    private TextArea Xmltextarea;
     @FXML
     private Label Xsdlabel;
     @FXML
@@ -43,17 +76,48 @@ public Parent root;
     @FXML
     public void handleXsdFile(ActionEvent e) {
         try {
+
+            FileChooser fileChooser = new FileChooser();
+            Stage stage= (Stage) XsdXmlpane.getScene().getWindow();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XSD files (*.xsd)", "*.xsd");
+            fileChooser.getExtensionFilters().add(extFilter);
+
+            File Xsdfile = fileChooser.showOpenDialog(stage);
+
+           /*
             FileChooser fileChooser = new FileChooser();
             fileChooser.setInitialDirectory(new File("e:\\"));
 
             fileChooser.setTitle("Choose File");
             Stage stage= (Stage) XsdXmlpane.getScene().getWindow();
-            File file = fileChooser.showOpenDialog(stage);
-            XsdfilePath=file.getAbsolutePath();
-            if (file != null) {
-                Xsdlabel.setText(file.getAbsolutePath()
+            File file = fileChooser.showOpenDialog(stage);*/
+            XsdfilePath=Xsdfile.getAbsolutePath();
+
+            String line = "";
+            String tline="";
+
+            try( FileReader fileStream = new FileReader( XsdfilePath );
+                 BufferedReader bufferedReader = new BufferedReader(fileStream) ) {
+                while((line = bufferedReader.readLine()) != null ) {
+                    System.out.println("the line is"+line);
+                    line=line+"\n";
+                    tline += line;
+                }
+                Xsdtextarea.setText(tline);
+                System.out.println("this is"+ tline);
+
+            } catch ( FileNotFoundException ex ) {
+                //exception Handling
+            } catch ( IOException ex ) {
+                //exception Handling
+            }
+
+            if (Xsdfile != null) {
+                Xsdlabel.setText(Xsdfile.getAbsolutePath()
                         + " selected");
-                System.out.println("The path is"+file.getAbsolutePath());
+                System.out.println("The path is"+Xsdfile.getAbsolutePath());
+                System.out.println("the tline is"+tline);
+
             } else {
                 System.out.println("No file selected");
             }
@@ -66,16 +130,46 @@ public Parent root;
     public void handleXmlFile(ActionEvent e) {
         try {
             FileChooser fileChooser = new FileChooser();
+            Stage stage= (Stage) XsdXmlpane.getScene().getWindow();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+            fileChooser.getExtensionFilters().add(extFilter);
+            File Xmlfile = fileChooser.showOpenDialog(stage);
+
+         /*
+          FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
+            fileChooser.getExtensionFilters().add(extFilter);
             fileChooser.setInitialDirectory(new File("e:\\"));
 
             fileChooser.setTitle("Choose File");
             Stage stage= (Stage) XsdXmlpane.getScene().getWindow();
-            File Xsdfile = fileChooser.showOpenDialog(stage);
-              XmlfilePath=Xsdfile.getAbsolutePath();
-            if (Xsdfile != null) {
-                Xmllabel.setText(Xsdfile.getAbsolutePath()
+            File Xmlfile = fileChooser.showOpenDialog(stage);
+         */
+
+            XmlfilePath=Xmlfile.getAbsolutePath();
+            String Xmlline = "";
+            String Xmltext="";
+
+            try(FileReader fileStream = new FileReader(XmlfilePath );
+                 BufferedReader bufferedReader = new BufferedReader(fileStream) ) {
+                while((Xmlline = bufferedReader.readLine()) != null ) {
+                    System.out.println("the Xmline is"+Xmlline);
+                    Xmlline=Xmlline+"\n";
+                    Xmltext += Xmlline;
+                }
+                Xmltextarea.setText(Xmltext);
+                System.out.println("this is"+ Xmltext);
+
+            } catch ( FileNotFoundException ex ) {
+                //exception Handling
+            } catch ( IOException ex ) {
+                //exception Handling
+            }
+
+            if (Xmlfile != null) {
+                Xmllabel.setText(Xmlfile.getAbsolutePath()
                         + " selected");
-                System.out.println("The path is"+Xsdfile.getAbsolutePath());
+                System.out.println("The path is"+Xmlfile.getAbsolutePath());
             } else {
                 System.out.println("No file selected");
             }
@@ -83,25 +177,27 @@ public Parent root;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-
     }
-    public void validateXmlwithXsd(ActionEvent event) throws IOException {
-        System.out.println("The value is"+validateXMLSchema(XsdfilePath, XmlfilePath));
-        Boolean isValidXml= validateXMLSchema(XsdfilePath, XmlfilePath);
-        if(isValidXml==true){
-             root = FXMLLoader.load(getClass().getResource("success.fxml"));
-             stage=(Stage) ((Node)event.getSource()).getScene().getWindow();
-             stage.setTitle("Success Valid XML and XSD");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } else {
-            root = FXMLLoader.load(getClass().getResource("invalid.fxml"));
-            stage=(Stage) ((Node)event.getSource()).getScene().getWindow();
-            stage.setTitle("Invalid XML or XSD");
-            stage.setScene(new Scene(root));
-            stage.show();
-        }
+    public void validateXmlwithXsd(ActionEvent event) throws IOException, SAXException {
+        System.out.println("The reult is true using path"+validateXMLSchema(XsdfilePath, XmlfilePath));
 
+        //converting to input stream
+        InputStream Xsdstream = new ByteArrayInputStream(Xsdtextarea.getText().getBytes(StandardCharsets.UTF_8));
+        InputStream Xmlstream = new ByteArrayInputStream(Xmltextarea.getText().getBytes(StandardCharsets.UTF_8));
+
+        System.out.println("The text area values are"+Xsdtextarea.getText());
+        Xsdtextarea.getText();
+        Boolean isValidXml = validate(Xmltextarea.getText(),Xsdtextarea.getText());
+                //validateAgainstXSDUsingInputstream(Xsdstream,Xmlstream);
+        System.out.println("The is Xml is "+ isValidXml);
+
+        if(isValidXml == true ){
+            Resultlabel.setText("SUCCESS! CORRECT XML!");
+
+        } else {
+            Resultlabel.setText("WARNING! WRONG XML!");
+
+        }
     }
 
     public static boolean validateXMLSchema(String xsdPath, String xmlPath){
@@ -117,7 +213,37 @@ public Parent root;
         }
         return true;
     }
-@FXML
+
+
+
+    public boolean validate(String inputXml, String inputXsd)
+            throws SAXException, IOException {
+        // build the schema
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        //File schemaFile = new File(schemaLocation);
+        Source Xsdsource = new StreamSource(new StringReader(inputXsd));
+        Schema schema=factory.newSchema(Xsdsource);
+        Validator validator = schema.newValidator();
+
+        // create a source from a string
+        Source source = new StreamSource(new StringReader(inputXml));
+
+        // check input
+        boolean isValid = true;
+        try  {
+
+            validator.validate(source);
+        }
+        catch (SAXException e) {
+
+            System.err.println("Not valid");
+            isValid = false;
+        }
+        return isValid;
+    }
+
+
+    @FXML
     public void goBackHome(ActionEvent event) throws IOException {
             root = FXMLLoader.load(getClass().getResource("home.fxml"));
             stage=(Stage) ((Node)event.getSource()).getScene().getWindow();
